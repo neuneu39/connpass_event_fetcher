@@ -1,6 +1,7 @@
 from __future__ import print_function
 import datetime
 import pickle
+import csv
 import os.path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -9,21 +10,29 @@ from google.auth.transport.requests import Request
 from listen_connpass import ConnpassEvent
 from bs4 import BeautifulSoup
 
-# If modifying these scopes, delete the file token.pickle.
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 
 def insert_event():
-    """Shows basic usage of the Google Calendar API.
-    Prints the start and name of the next 10 events on the user's calendar.
-    """
+    creds = check_google_token()
+    service = build('calendar', 'v3', credentials=creds)
+
+    events_10 = ConnpassEvent(201907, ['東京', 'python'])
+    events = events_10.get_connpass_events()
+    for event in events:
+        print(event['event_id'])
+        if duplicate(event['event_id']):
+            print('duplicate data found in', event['event_id'])
+            continue
+        print('inset event data', event['title'])
+        event_body = event_formatter(event)
+        event = service.events().insert(calendarId='primary', body=event_body).execute()
+
+
+def check_google_token():
     creds = None
-    # The file token.pickle stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
     if os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token:
             creds = pickle.load(token)
-    # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -31,19 +40,20 @@ def insert_event():
             flow = InstalledAppFlow.from_client_secrets_file(
                 'credentials.json', SCOPES)
             creds = flow.run_local_server()
-        # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
+    return creds
 
-    service = build('calendar', 'v3', credentials=creds)
-
-    events = ConnpassEvent(201906, ['東京', 'python'])
-    event = events.get_connpass_events()
-    # print('event:', event_formatter(event))
-    event_body = event_formatter(event)
-    event = service.events().insert(calendarId='primary', body=event_body).execute()
-    # f'Event created:{(event.get('htmlLink')}'
-    print(event)
+def duplicate(event_id) -> bool:
+    with open('test.csv', 'r') as f:
+        reader = csv.reader(f)
+        for t in reader:
+            if str(event_id) in t:
+                return True
+    with open('test.csv', 'a') as f:
+        writer = csv.writer(f, lineterminator='\n')
+        writer.writerow([event_id])
+    return None
 
 
 def event_formatter(event):
