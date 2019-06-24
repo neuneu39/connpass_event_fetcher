@@ -16,8 +16,8 @@ def insert_event():
     creds = check_google_token()
     service = build('calendar', 'v3', credentials=creds)
 
-    events_10 = ConnpassEvent(201907, ['東京', 'python'])
-    events = events_10.get_connpass_events()
+    target_events = ConnpassEvent(201907, ['東京', 'python'])
+    events = target_events.get_connpass_events()
     for event in events:
         print(event['event_id'])
         if duplicate_event(event['event_id']):
