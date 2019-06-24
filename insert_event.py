@@ -75,7 +75,7 @@ def event_formatter(event):
             'RRULE:FREQ=DAILY;COUNT=1'
         ],
         'attendees': [
-            {'email': 'aku2kan@gmail.com'},
+            {'email': 'test@gmail.com'},
         ],
         'reminders': {
             'useDefault': False,
