@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 import requests
-import json
-import datetime
 import time
-import pprint
 
 CONNPASS_API = 'https://connpass.com/api/v1/event/'
+
 
 class ConnpassEvent:
 
@@ -27,5 +25,3 @@ class ConnpassEvent:
             events = response_data.json()['events']
             print('対象のイベントは', response_data.json()['results_returned'])
             return events
-
-# get_connpass_events(201906, ['東京', 'python'])

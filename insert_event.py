@@ -1,5 +1,4 @@
 from __future__ import print_function
-import datetime
 import pickle
 import csv
 import os.path
@@ -12,6 +11,7 @@ from bs4 import BeautifulSoup
 
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 
+
 def insert_event():
     creds = check_google_token()
     service = build('calendar', 'v3', credentials=creds)
@@ -20,12 +20,13 @@ def insert_event():
     events = events_10.get_connpass_events()
     for event in events:
         print(event['event_id'])
-        if duplicate(event['event_id']):
+        if duplicate_event(event['event_id']):
             print('duplicate data found in', event['event_id'])
             continue
         print('inset event data', event['title'])
         event_body = event_formatter(event)
-        event = service.events().insert(calendarId='primary', body=event_body).execute()
+        event = service.events().insert(calendarId='primary',
+                                        body=event_body).execute()
 
 
 def check_google_token():
@@ -44,7 +45,8 @@ def check_google_token():
             pickle.dump(creds, token)
     return creds
 
-def duplicate(event_id) -> bool:
+
+def duplicate_event(event_id) -> bool:
     with open('test.csv', 'r') as f:
         reader = csv.reader(f)
         for t in reader:
@@ -78,8 +80,8 @@ def event_formatter(event):
         'reminders': {
             'useDefault': False,
             'overrides': [
-            {'method': 'email', 'minutes': 24 * 60},
-            {'method': 'popup', 'minutes': 10},
+                {'method': 'email', 'minutes': 24 * 60},
+                {'method': 'popup', 'minutes': 10},
             ],
         },
     }
@@ -98,6 +100,7 @@ def format_html_to_text(html):
     # drop blank lines
     text = '\n'.join(chunk for chunk in chunks if chunk)
     return text
+
 
 if __name__ == '__main__':
     insert_event()
