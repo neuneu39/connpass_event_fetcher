@@ -7,7 +7,7 @@ CONNPASS_API = 'https://connpass.com/api/v1/event/'
 
 class ConnpassEvent:
 
-    def __init__(self, started_month: int, keyword: list, count=5):
+    def __init__(self, started_month: int, keyword: list, count=15):
         self.started_month = started_month
         self.keyword = keyword
         self.count = count

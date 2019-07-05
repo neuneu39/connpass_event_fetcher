@@ -12,12 +12,13 @@ from bs4 import BeautifulSoup
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 
 
-def insert_event():
+def insert_event(input_date=201905, input_search_word=['東京', 'python']):
     creds = check_google_token()
     service = build('calendar', 'v3', credentials=creds)
 
-    target_events = ConnpassEvent(201907, ['東京', 'python'])
+    target_events = ConnpassEvent(input_date, input_search_word)
     events = target_events.get_connpass_events()
+    event_num = 0
     for event in events:
         print(event['event_id'])
         if duplicate_event(event['event_id']):
@@ -27,6 +28,8 @@ def insert_event():
         event_body = event_formatter(event)
         event = service.events().insert(calendarId='primary',
                                         body=event_body).execute()
+        event_num += 1
+    return event_num
 
 
 def check_google_token():
